@@ -46,7 +46,7 @@ void setup() {
   digitalWrite(YellowLedPin, LOW);
 
   // Attach an interrupt to the second ISR vector, which corresponds to the PIN number 3 - switch button
-  attachInterrupt(1, ChangeState, RISING);
+  attachInterrupt(1, InterruptChangeState, RISING);
 
   //begin serial interface
   Serial.begin(9600);                                                    
@@ -98,7 +98,7 @@ void loop() {
 /**
  * Interrupt function for when the user triggers the switch button
  */
-void ChangeState(){
+void InterruptChangeState(){
   //Flips leds and boolean for inputFridge value
   digitalWrite(RedLedPin, !digitalRead(RedLedPin));
   digitalWrite(GreenLedPin, !digitalRead(GreenLedPin));
