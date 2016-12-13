@@ -9,7 +9,6 @@ Barcode Scanner
   2007                                                                   
 */
 
-
 const int GreenLedPin = 6;  // green led pin number - green tells the user that the barcode will scan and increment that product on the database
 const int RedLedPin = 7;  // red led pin number - on the other hand, red means that product read by the barcode will be taken from the database
 const int YellowLedPin = 9; // yellow pin for error warning
@@ -25,11 +24,8 @@ int clockValue = 0;
 byte dataValue;
 byte scanCodes[10] = {0x45,0x16,0x1e,0x26,0x25,0x2e,0x36,0x3d,0x3e,0x46}; 
 char characters[10] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
-int quantityCodes = 10;
 char buffer[64] = {}; // This saves the characters (for now only numbers) 
 int bufferPos = 0; 
-int bufferLength = 64;
-
 
 void setup() {
   //output mode for the LED pins
@@ -37,8 +33,8 @@ void setup() {
   pinMode(RedLedPin, OUTPUT);
   pinMode(YellowLedPin, OUTPUT);
   //input mode for data and clock pin of the barcode scanner
-  pinMode(dataPin, INPUT);                                               
-  pinMode(clockPin, INPUT);
+  pinMode(dataPin, INPUT_PULLUP);                                               
+  pinMode(clockPin, INPUT_PULLUP);
 
   //Red light on, green light off indicating that products will be subtracted by default
   digitalWrite(RedLedPin, HIGH);
@@ -53,27 +49,25 @@ void setup() {
 }
 
 void loop() {
-  
-  dataValue = dataRead();                                                
+  Serial.print("-");
+  dataValue = dataRead();
+                                             
   // If there is a break code, skip the next byte                        
-  if (dataValue == SCAN_BREAK) {                                         
-    breakActive = 1;                                                     
-  }                                                                      
-  // Translate the scan codes to numbers                                 
-  // If there is a match, store it to the buffer                         
-  for (int i = 0; i < quantityCodes; i++) {                              
-    byte temp = scanCodes[i];                                            
-    if(temp == dataValue){                                               
-      if(!breakActive == 1){                                             
-        buffer[bufferPos] = characters[i];                               
-        bufferPos++;                                                     
-      }                                                                  
-    }                                                                    
-  }                                                                      
-  //Serial.print('*'); // Output an asterix for every byte               
-  // Print the buffer if SCAN_ENTER is pressed.                          
-  if(dataValue == SCAN_ENTER){                                           
-    Serial.print("\nbuffer: ");                                          
+  if (dataValue != SCAN_BREAK && dataValue != SCAN_ENTER) {     
+    if(breakActive == 1) breakActive = 0;
+    else{
+      for (int i = 0; i < sizeof(characters); i++) {                                                                 
+      if(scanCodes[i] == dataValue){                                                                                          
+        buffer[bufferPos] = characters[i];
+        bufferPos++;
+        break;                                                       
+        }                                                                    
+      }  
+    }
+  }
+  else if (dataValue == SCAN_ENTER){  
+    breakActive = 0;
+    Serial.print("\nbuffer: ");          
     // Read the buffer                                                   
     int i=0;                                                             
     if (buffer[i] != 0) {                                                
@@ -82,17 +76,15 @@ void loop() {
         buffer[i] = 0;                                                   
         i++;                                                             
       }                                                                  
-    }                                                                    
-    Serial.println(" [Enter]");                                          
-    bufferPos = 0;                                                        
-  }                                                                      
-  // Reset the SCAN_BREAK state if the byte was a normal one             
-  if(dataValue != SCAN_BREAK){                                           
-    breakActive = 0;                                                     
-  }                                                                      
+    }                        
+    bufferPos = 0;                      
+  }            
+  else if (dataValue == SCAN_BREAK){
+    breakActive = 1;                             
+  }
   dataValue = 0;    
-                                                     
 }
+
 
 
 /**
@@ -110,8 +102,8 @@ void InterruptChangeState(){
  * Function that will return the value read by the barcode scanner
  */
 int dataRead() {
-  byte val = 0;                                                          
-  while (digitalRead(clockPin));  // Wait for LOW - Clocl is high when barcode is idle.                       
+  byte val = 0;
+  while (digitalRead(clockPin));  // Wait for LOW - Clock is high when barcode is idle.                                                                                 
   // Skip start state and start bit                                      
   while (!digitalRead(clockPin)); // Wait for HIGH.                      
   while (digitalRead(clockPin));  // Wait for LOW.                       
