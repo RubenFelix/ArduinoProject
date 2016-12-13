@@ -12,7 +12,7 @@ Barcode Scanner
 const int GreenLedPin = 6;  // green led pin number - green tells the user that the barcode will scan and increment that product on the database
 const int RedLedPin = 7;  // red led pin number - on the other hand, red means that product read by the barcode will be taken from the database
 const int YellowLedPin = 9; // yellow pin for error warning
-boolean inputFridge = false;  // variable that will control if the barcodes will subtract or increment things on the fridge [false - subtract | true - increment] 
+boolean inputFridge = true;  // variable that will control if the barcodes will subtract or increment things on the fridge [false - subtract | true - increment] 
 
 
 int clockPin = 8;
@@ -60,19 +60,19 @@ void setup() {
 void loop() {
   if(logging) Serial.println("-= loop() initial...");
   if(logging) Serial.println("-= loop() - GLOBAL VARIABLES -");
-  if(logging) Serial.println("-= loop() - BreakActive: ");
-  if(logging) Serial.print(breakActive);
-  if(logging) Serial.println("-= loop() - dataValue: ");
-  if(logging) Serial.print(dataValue);
-  if(logging) Serial.println("-= loop() - bufferPos: ");
-  if(logging) Serial.print(bufferPos);
+  if(logging) Serial.print("-= loop() - BreakActive: ");
+  if(logging) Serial.println(breakActive);
+  if(logging) Serial.print("-= loop() - dataValue: ");
+  if(logging) Serial.println(dataValue);
+  if(logging) Serial.print("-= loop() - bufferPos: ");
+  if(logging) Serial.println(bufferPos);
   if(logging) Serial.println("-= loop() - ---------------- -");
   
   if(logging) Serial.println("-= loop() - before dataRead()");
   dataValue = dataRead();
   if(logging) Serial.println("-= loop() - after dataRead()");
-  if(logging) Serial.println("-= dataValue: ");
-  if(logging) Serial.print(dataValue);
+  if(logging) Serial.print("-= dataValue: ");
+  if(logging) Serial.println(dataValue);
                                              
   // If there is a break code, skip the next byte                        
   if (dataValue != SCAN_BREAK && dataValue != SCAN_ENTER) {
@@ -86,13 +86,13 @@ void loop() {
       for (int i = 0; i < sizeof(characters); i++) {                                                                 
       if(scanCodes[i] == dataValue){                                                                                          
         buffer[bufferPos] = characters[i];
-        if(logging) Serial.println("-= loop() - New char saved on buffer position ");
-        if(logging) Serial.print(bufferPos);
+        if(logging) Serial.print("-= loop() - New char saved on buffer position ");
+        if(logging) Serial.println(bufferPos);
         if(logging) Serial.print(". Char saved: ");
-        if(logging) Serial.print(characters[i]);
+        if(logging) Serial.println(characters[i]);
         bufferPos++;
-        if(logging) Serial.println("-= loop() - bufferPos incremented. New value: ");
-        if(logging) Serial.print(bufferPos);
+        if(logging) Serial.print("-= loop() - bufferPos incremented. New value: ");
+        if(logging) Serial.println(bufferPos);
         break;                                                       
         }                                                                    
       }  
@@ -143,13 +143,13 @@ int dataRead() {
   
   while (digitalRead(clockPin));  // Wait for LOW - Clock is high when barcode is idle.                                                                                 
   // Skip start state and start bit                                      
-  if(logging) Serial.println("-= inside dataRead() - LOW");
+  //if(logging) Serial.println("-= inside dataRead() - LOW");
   
   while (!digitalRead(clockPin)); // Wait for HIGH.
-  if(logging) Serial.println("-= inside dataRead() - HIGH");
+  //if(logging) Serial.println("-= inside dataRead() - HIGH");
                         
   while (digitalRead(clockPin));  // Wait for LOW.       
-  if(logging) Serial.println("-= inside dataRead() - LOW");
+  //if(logging) Serial.println("-= inside dataRead() - LOW");
 
   
   for (int offset = 0; offset < 8; offset++) {                           
@@ -159,18 +159,18 @@ int dataRead() {
   }                                                                      
   // Skipping parity and stop bits down here.                            
   while (digitalRead(clockPin));           // Wait for LOW.
-  if(logging) Serial.println("-= inside dataRead() - LOW");
+  //if(logging) Serial.println("-= inside dataRead() - LOW");
                 
   while (!digitalRead(clockPin));          // Wait for HIGH.
-  if(logging) Serial.println("-= inside dataRead() - HIGH");
+  //if(logging) Serial.println("-= inside dataRead() - HIGH");
                
   while (digitalRead(clockPin));           // Wait for LOW.
-  if(logging) Serial.println("-= inside dataRead() - LOW");
+  //if(logging) Serial.println("-= inside dataRead() - LOW");
                 
   while (!digitalRead(clockPin));          // Wait for HIGH.
-  if(logging) Serial.println("-= inside dataRead() - HIGH");
+  //if(logging) Serial.println("-= inside dataRead() - HIGH");
 
-  if(logging) Serial.println("-= inside dataRead() - value to be returned: ");
-  if(logging) Serial.print(val);   
+  if(logging) Serial.print("-= inside dataRead() - value to be returned: ");
+  if(logging) Serial.println(val);   
   return val;
 }
